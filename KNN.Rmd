@@ -1,0 +1,190 @@
+---
+title: "KNN"
+author: "Chen Ning Kuan"
+date: "2020年3月25日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(magrittr)# fancy pipe 11 
+require(matrixcalc)
+```
+
+# Introduce the algorithm of Knn
+
+1.first calculate the distance between Xtrain and Xtest
+2.choose k
+3.vote
+
+```{r}
+data(iris)
+class(iris$Species)
+set.seed(1)
+data <- iris[sample(nrow(iris))   ,]
+Xtrain <- data[1:100,1:4]
+label <- data[1:100,5]
+Xtest <- data[101:150,1:4]
+```
+
+我的思路如下，如果要計算所有測試樣本(M個)和訓練樣本(N個)的距離的話，距離矩陣的
+dim(距離矩陣)=M*N
+
+這實在是有點難想，但不如我們先來想一下，如果只計算訓練樣本的第一筆資料和測試樣本的第一筆資料該怎麼做呢
+
+```{r}
+Xtrain[1,]
+Xtest[1,]
+Xtrain[1,]-Xtest[1,]
+(Xtrain[1,]-Xtest[1,])^2 
+sum((Xtrain[1,]-Xtest[1,])^2)
+sum((Xtrain[1,]-Xtest[1,])^2) %>% sqrt()
+
+```
+
+很簡單對吧!
+
+那如果是Xtrain 1th 和 Xtest 2th 的距離呢 ?
+
+```{r}
+Xtrain[1,]-Xtest[1,]
+(Xtrain[1,]-Xtest[2,])^2 
+sum((Xtrain[1,]-Xtest[2,])^2)
+sum((Xtrain[1,]-Xtest[2,])^2) %>% sqrt()
+```
+
+所以其實雙重矩陣的結構就可以幫我們計算遍歷的結果，但筆者畢竟不喜歡用for，其實是正在練習apply家族，因為比較潮阿!
+
+複習一下，待會會用到喔!
+
+```{r}
+x=c(2.5,7,0,2.2,5.7)
+sort(x)
+order(x)
+
+```
+
+要理解order也很簡單，你去看sort後的結果是由小排到大對吧，所以order就是返回最小值在原x中是第幾個!
+
+0在原數列是第3個
+2.2在原數列當中是第4個
+2.5在原數列當中是第1個
+
+超簡單對吧!
+
+
+```{r}
+k=3
+M <- nrow(Xtrain)
+N <- nrow(Xtest)
+
+distmatrix <- matrix(0,nrow = M,ncol = N)
+
+for(i in 1:M){
+  for(j in 1:N){
+    distmatrix[i,j]<- sum((Xtrain[i,]-Xtest[j,])^2) %>% sqrt()
+  }
+}
+distmatrix[1,1] #for check
+sortedDistIndexes <- apply(distmatrix,2,order)
+dim( sortedDistIndexes   )
+
+sortedDistIndexes[1:k,1]
+
+```
+
+這裡返回，對第3筆測試資料來說距離的K筆traing data 在 traing data中是第幾筆，這樣我們就可以找出他們的label
+
+```{r}
+sortedDistIndexes[1:k,3]
+```
+
+```{r}
+label[sortedDistIndexes[1:k,1]]
+label[sortedDistIndexes[1:k,2]]
+label[sortedDistIndexes[1:k,3]]
+#label
+
+```
+
+```{r}
+matrix(label[sortedDistIndexes[1:k,1:nrow(Xtest)]],ncol = k,byrow = T)
+
+ans<- matrix(label[sortedDistIndexes[1:k,1:nrow(Xtest)]],ncol = k,byrow = T)
+```
+
+
+```{r}
+
+
+```
+
+
+首先要先看懂這個小例子!
+
+```{r}
+x <- c(2:3)
+y <- c(4:8)
+sapply(x,function(i){
+    i*y
+})
+```
+
+這裡提供了一個思路，最後一行計算了所有的訓練樣本跟第一筆測試樣本的相減距離
+
+```{r}
+
+Xtest[1,] - Xtrain[1,]
+Xtest[1,] - Xtrain[2,]
+Xtest <- as.matrix(Xtest)
+matrix(rep(Xtest[1,],nrow(Xtrain)),ncol=ncol(Xtrain),byrow = T)-Xtrain
+
+(matrix(rep(Xtest[1,],nrow(Xtrain)),ncol=ncol(Xtrain),byrow = T)-Xtrain)^2 %>% apply(X=. ,1,sum)%>%sqrt
+```
+
+
+```{r}
+
+(matrix(rep(Xtest[1,],nrow(Xtrain)),ncol=ncol(Xtrain),byrow = T)-Xtrain)^2 %>% apply(X=. ,1,sum)%>%sqrt
+
+```
+
+
+
+```{r}
+
+sum((Xtrain[1,]-Xtest[2,])^2) %>% sqrt()
+
+M <- nrow(Xtrain)
+N <- nrow(Xtest)
+
+i <- 1:M
+j <- 1:N
+
+
+apply(X =Xtrain , 1 , function( i){i^2}    )
+
+5.1*5.1
+
+apply(X =Xtrain , 1 , function(i){i-Xtest[1,]}    )
+Xtrain[1,]
+Xtest[1,]
+Xtrain[1,]-Xtest[1,]
+Xtrain[2,]-Xtest[1,]
+Xtest[1,]
+Xtest[1,] - Xtrain
+Xtest <- as.matrix(Xtest)
+matrix(rep(Xtest[1,],nrow(Xtrain)),ncol=ncol(Xtrain),byrow = T)-Xtrain
+```
+
+```{r}
+
+
+```
+

@@ -18,6 +18,10 @@ knitr::opts_chunk$set(echo = TRUE)
 # 筆記的目標
 
   - 在這個筆記中，我打算用兩個簡單的例子來實作看看 Gradient descent 如何找到local minimun。
+  
+  - 我也會展示過大或過小的learning rate會發生甚麼慘況，前者會發生over shooting的狀況，後者則可能停留在不恰當的地方
+  
+![overshooting and small learning rate](./overshooting.png)
 
   - 首先我們常常會遇到一個問題就是要使某個函數$f(\theta)$最小化，$\theta$是我們的參數，我們要找出在$\theta$的值在何處時，會使$f(\theta)$最小，舉例來說如果$f(\theta)=\theta^2+3$ 那麼當theta為0時，我們有最小值3，請注意我們的答案是0而不是3，這點非常重要!
   
@@ -37,6 +41,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - theta它是我們的參數可以有一個或是很多個
 
+- here is the way to updata $\theta$
+
 $$\theta{^{i+1}} \leftarrow \theta{^i}-\eta* \frac{\partial f(\theta{^i})}{\partial\theta^i} $$
 
 - 請注意$i$並非次方的意思，而是第幾次的迭代符號
@@ -44,8 +50,23 @@ $$\theta{^{i+1}} \leftarrow \theta{^i}-\eta* \frac{\partial f(\theta{^i})}{\part
 $\eta$則是所謂的學習率代表要往哪裡走幾步，
 $\frac{\partial f(\theta{^i})}{\partial\theta^i}$則是我們要往哪裡走的方向!
 
+
+但是在$\theta$只有一個dim時，方向不是往左就是往右就是了，
+而且這件事真的是宇宙無敵直關，你想想看$\eta$是一個正的數字，如果
+$$\frac{\partial f(\theta{^i})}{\partial\theta^i}$$
+
+的值為正，代表那個點的切線斜率為正，不就代表往右走一小步的話$f(\theta)$值應該會變大，往左走會變小，這時候$-\eta*\frac{\partial f(\theta{^i})}{\partial\theta^i}$的值是負的!
+
+代表我們要往左走
+
+$\theta{^i}-\eta* \frac{\partial f(\theta{^i})}{\partial\theta^i}$後
+
+$f(\theta{^{i+1}})$真的會變小
+
+反之讀者則可自行驗證
+
 現在我要開始代數字了 ，假設我們的function 很簡單，只有一個參數
-$f(x)=x^2$ 也就是theta in this case is x.
+$y=f(x)=x^2$ 也就是theta in this case is x.
 然後我們的intial guess $x{^1}$ is -3.
 為了方便計算學習率$\eta=0.1$，
 我們來逐步的代入看看會發生甚麼事情
@@ -56,16 +77,20 @@ $f(x)=x^2$ 也就是theta in this case is x.
 
 這裡會微分的朋友就知道 答案是 $2x{^{(i)}}$
 
+第二步:開始代數字啦
+
 所以當 i=1時
 
 $$x{^2}=x{^1}-\eta*\frac{\partial f(x{^i})}{\partial x^i} $$
 
-$$x{^1}=-3-0.1*2*(x{^0}) $$
-將-3代入$x{^0}$
+$$x{^2}=-3-0.1*2*(x{^1}) $$
+將-3代入$x{^1}$
 $$x{^2}=-3-0.1*2*(-3) $$
 $$x{^2}=-2.4$$
 
 所以當 i=2時
+
+將-2.4代入$x{^2}$
 
 $$x{^3}=-2.4-0.1*2*(-2.4)$$
 $$x{^3}=-1.92   $$
@@ -75,6 +100,11 @@ $$x{^3}=-1.92   $$
 
 ## 程式碼實作 (函數1)
 
+以下都令$y=f(x)$
+
+我們的函數是 $ min f(x)=x^2$，這個函數的最小值發生在x=0時，其最小值也是$0$
+
+- 讓我們先把函數畫出來
 
 ```{r}
 x=seq(-3,3,0.01)
@@ -107,7 +137,7 @@ for(i in 1:R){
 data.frame(x,y=f(x))
 ```
 
-可以看出我們的算法正確，請讀者去看一下x的值和手算的一樣，因為x隨著迭代的次數增加也會跟著靠近真正的答案0
+可以看出我們的算法正確，請讀者去看一下x的值和手算的一樣，而且x也確實隨著迭代的次數增加也會跟著靠近真正的答案0
 
 但是還沒完喔，如果我們的learing rate設的不太好，可能會有以下的慘況
 
@@ -135,10 +165,11 @@ data.frame(x,y=f(x))
 
 ```
 
+- 就是互相射來射去又在同一個位置上
+
 ### if $\eta=2$ in this case
 
-this is the case called overshooting
-就是射太遠了!
+
 ```{r}
 R=10
 #eta is learning rate
@@ -162,21 +193,31 @@ data.frame(x,y=f(x))
 
 ```
 
+- this is the case called overshooting.就是射太遠了!
+
+![overshooting and small learning rate](./overshooting.png)
+
+- 稍微對照就會發現這就是圖片左邊的overshooting
+
 - 可能會有讀者覺得learning rate越小越好但可以看一下這個以下這個例子
 
 ## 程式碼實作 (函數2)
 
-we want minimize this function $x^4-8*x^3$
+以下都令$y=f(x)$
 
-the global minimum is -432 at 6
+我們的目標函數是 $x^4-8*x^3$
 
+這個函數的最小值發生在$x=6$時
+
+其最小值是$-432$
+
+- 讓我們先把函數畫出來
 
 ```{r}
 x=seq(-7,12,0.0001)
 plot( x ,x^4-8*x^3 ,type = "l" ,xlab = "x",ylab = "f(x)"  )
 ```
 
- 
 
 ###case1: 
 $\eta=0.0001$
@@ -202,6 +243,8 @@ data.frame(x,y=f(x))
 
 ```
 
+- 這裡看出他不小心停留在高原地帶了(x=0附近)
+
 ###case2: 
 $\eta=0.01$
 
@@ -225,10 +268,12 @@ data.frame(x,y=f(x))
 
 ```
 
+- 可以看出在第25次左右就得到了非常好的答案
+
 #總結
 
-- 這裡可以看出learning rate的大小是一個非常重要的議題，其實intail guess也會影響，有興趣的同學可以改改看
+- 這裡可以看出learning rate的大小是一個非常重要的議題，其實intial guess也會影響，有興趣的同學可以改改看
 
-- 只有一個dim的實作非常簡單，可惜的是無法體現微分方向的重要性，因為不是往左就是往右
+- 當$\theta$只有一個dim的實作非常簡單，可惜的是無法體現微分方向的重要性，因為不是往左就是往右
 
 - 要改我的範例也很簡單，只是要手算出partialf的fucntion

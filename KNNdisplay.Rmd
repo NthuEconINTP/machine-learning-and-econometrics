@@ -1,0 +1,276 @@
+---
+title: "KNN with out using package"
+author: "Chen Ning Kuan"
+date: "2020年3月25日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(magrittr)# fancy pipe 11 
+#require(matrixcalc)
+```
+
+# The origin of this note
+
+在這個大套件時代，能否手刻似乎是一種浪漫，但是手刻是體現你有沒有正確理解演算法的最不容質疑的方式，必須要懂細節，並且知道如何去implement it! 
+
+還有網路上其實沒有很多R語言的手刻範例，即使有也不見得是中文的，也很少到逐步去解釋programmer的思路的筆記
+
+
+# Introduce the algorithm of Knn
+
+1.first calculate the distance between Xtrain and Xtest
+
+2.choose k this is hyper parameter in knn algorithm
+
+3.vote the majority in the k neighbor
+
+- we use the famous dataset iris to check it
+
+```{r}
+data(iris)
+class(iris$Species)
+set.seed(1)
+data <- iris[sample(nrow(iris))   ,] # 打散資料
+Xtrain <- data[1:100,1:4]
+label <- data[1:100,5]
+Xtest <- data[101:150,1:4]
+testlabel <- data[101:150,5]
+```
+
+#Implement Knn with out using package
+
+## Calculate distance matrix
+
+我的思路如下，如果要計算所有訓練樣本(M個)和測樣樣本(N個)的距離的話，距離矩陣的
+dim(距離矩陣)=M*N
+
+但這實在是有點難想，但不如我們先來想一下，如果只計算訓練樣本的第一筆資料和測試樣本的第一筆資料該怎麼做呢
+
+```{r}
+Xtrain[1,]
+Xtest[1,]
+Xtrain[1,]-Xtest[1,]
+(Xtrain[1,]-Xtest[1,])^2 
+sum((Xtrain[1,]-Xtest[1,])^2)
+sum((Xtrain[1,]-Xtest[1,])^2) %>% sqrt()
+
+```
+
+很簡單對吧!
+
+那如果是Xtrain 1th 和 Xtest 2th 的距離呢 ?
+
+```{r}
+Xtrain[1,]-Xtest[1,]
+(Xtrain[1,]-Xtest[2,])^2 
+sum((Xtrain[1,]-Xtest[2,])^2)
+sum((Xtrain[1,]-Xtest[2,])^2) %>% sqrt()
+```
+
+所以其實雙重迴圈的結構就可以幫我們計算遍歷的結果
+
+
+以下我們的k=3，也就是找最像的3個鄰居，然後要去看這3個鄰居的label是啥喔!(這樣才能做多數決)
+
+```{r}
+k=3
+M <- nrow(Xtrain)
+N <- nrow(Xtest)
+
+distmatrix <- matrix(0,nrow = M,ncol = N)
+
+for(i in 1:M){
+  for(j in 1:N){
+    distmatrix[i,j]<- sum((Xtrain[i,]-Xtest[j,])^2) %>% sqrt()
+  }
+}
+distmatrix[1,1] #for check
+
+```
+
+複習一下，待會會用到喔!
+
+```{r}
+x=c(2.5,7,0,2.2,5.7)
+sort(x)
+order(x)
+
+```
+
+要理解order也很簡單，你去看sort後的結果是由小排到大對吧，所以order的第一個元素就是返回最小值**在原x中是第幾個**!
+
+0在原數列是第3個
+
+2.2在原數列當中是第4個
+
+2.5在原數列當中是第1個
+
+超簡單對吧!
+
+## return order in the distance matrix
+
+```{r}
+sortedDistIndexes <- apply(distmatrix,2,order)
+dim( sortedDistIndexes   )
+
+```
+
+sortedDistIndexes is a matrix which dim is 100*50 ,and it return order in the distance matrix
+
+這個矩陣有點難以解釋但是看以下的解釋就會懂了
+
+這裡返回，對第1筆測試資料來說，**距離最近的3筆traing data 在 traing data中是第幾筆**(這句話一定要看懂)，這樣我們就可以**找出他們的label**
+
+上面這一小段一定要看懂，除了這一段其他都很straightforward
+
+```{r}
+sortedDistIndexes[1:k,1]
+```
+
+記得回去label 向量中找尋答案阿哥
+
+```{r}
+label[sortedDistIndexes[1:k,1]]
+label[sortedDistIndexes[1:k,2]]
+label[sortedDistIndexes[1:k,3]]
+#label #you can verify it
+
+```
+
+把剛剛做的事情對所有的測試資料都做一遍
+
+```{r}
+#matrix(label[sortedDistIndexes[1:k,1:nrow(Xtest)]],ncol = k,byrow = T)
+
+ans<- matrix(label[sortedDistIndexes[1:k,1:nrow(Xtest)]],ncol = k,byrow = T)
+
+dim(ans)
+
+ans[1:3,]
+```
+
+ans is a matrix which dim is 50*3 because we have 50 testing data and the k here is 3 
+
+we will use majority rule to find the answer
+
+For example the 1th testing data should be "setosa"
+and the 3th testing data should be "virginica" 
+
+##show the detail of how to find answer
+
+```{r}
+
+ans[3,]
+table(ans[3,])
+which.max(table(ans[3,]))
+names( which.max(table(ans[3,]))     )
+
+findmajority<-function(x) {
+  names( which.max(table(x))     )
+} 
+
+findmajority(ans[3,]  )
+```
+
+the table function will return a table contain how many species
+
+the which.max function return the highest frequency species 
+
+the names function help us to return the name in table
+
+```{r}
+#apply(ans,1,  fucntion(i){ names( which.max(table(i))  }   )can not work
+
+ans %>% apply( . ,1,findmajority   )
+
+finalanswer<- ans %>% apply( . ,1,findmajority   )
+
+finalanswer <- as.factor(finalanswer)
+
+```
+
+對答案囉
+
+```{r}
+finalanswer ==testlabel
+```
+
+# 總結
+
+寫程式的思路很簡單，不會寫function那就一步一步做，不會一次寫對全部的矩陣，那就寫對一列，不會寫對一列，那就寫對一個!
+
+- 把以上的東西複製貼上做適當修改 完成我們的knn function
+
+
+```{r}
+rm(list=ls()) # cleaning the environment
+require(magrittr)
+data(iris)
+class(iris$Species)
+set.seed(1)
+data <- iris[sample(nrow(iris))   ,]
+Xtrain <- data[1:100,1:4]
+Xtest <- data[101:150,1:4]
+label <- data[1:100,5]
+testlabel <- data[101:150,5]
+
+```
+
+```{r}
+my_knn <- function(Xtrain,Xtest,label,k     ){
+M <- nrow(Xtrain)
+N <- nrow(Xtest)
+distmatrix <- matrix(0,nrow = M,ncol = N)
+for(i in 1:M){
+  for(j in 1:N){
+    distmatrix[i,j]<- sum((Xtrain[i,]-Xtest[j,])^2) %>% sqrt()
+  }
+}
+sortedDistIndexes <- apply(distmatrix,2,order)
+
+ans<- matrix(label[sortedDistIndexes[1:k,1:nrow(Xtest)]],ncol = k,byrow = T)
+
+findmajority<-function(x) {
+  names( which.max(table(x))     )
+} 
+finalanswer<- ans %>% apply( . ,1,findmajority   )
+finalanswer <- as.factor(finalanswer)  
+return(finalanswer)
+}
+
+```
+
+```{r}
+
+predicted<- my_knn( Xtrain,Xtest,label,k=4)
+predicted==testlabel
+
+```
+
+
+- 發現我們的實作function回答跟package一樣
+
+```{r}
+
+require(class)
+packageanswer<- knn(Xtrain,Xtest,label,k=4    )
+predicted==packageanswer
+
+```
+
+比較一下自己寫的function跟套件的速度
+
+```{r}
+system.time(my_knn( Xtrain,Xtest,label,k=4))
+system.time( knn(Xtrain,Xtest,label,k=4    )     )
+```
+
+第一個是我的速度，第二個是套件的速度，果然差很多QQ
