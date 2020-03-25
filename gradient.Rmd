@@ -1,0 +1,234 @@
+---
+title: "Gradient descent"
+author: "Chen Ning Kuan"
+date: "2020年3月25日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 筆記的目標
+
+  - 在這個筆記中，我打算用兩個簡單的例子來實作看看 Gradient descent 如何找到local minimun。
+
+  - 首先我們常常會遇到一個問題就是要使某個函數$f(\theta)$最小化，$\theta$是我們的參數，我們要找出在$\theta$的值在何處時，會使$f(\theta)$最小，舉例來說如果$f(\theta)=\theta^2+3$ 那麼當theta為0時，我們有最小值3，請注意我們的答案是0而不是3，這點非常重要!
+  
+  - 我先假定讀者都已經看過Gradient descent的算法，所以我有些地方不會說的太仔細，但我會在該仔細的地方很仔細，其實台灣的教育最大的問題就是老師有時候都不代入數字去做實際運算，很多東西只要你實際帶入數字去算給學生看，就不會那麼難了!
+
+# 作者的內心話
+
+我個人的淺見是台灣的老師最大的問題是該仔細的地方講很快，不該仔細的地方講很久!
+我的意思是不代數字進去看就看的懂的人根本不需要老師教好嗎!自己看課本就會懂了!
+閒話不多說切入正題!
+
+# 切入正題
+
+
+## 目標
+- Our goal is to minimize $f(\theta)$ where $\theta$ is a vector or a scalar
+
+- theta它是我們的參數可以有一個或是很多個
+
+$$\theta{^{i+1}} \leftarrow \theta{^i}-\eta* \frac{\partial f(\theta{^i})}{\partial\theta^i} $$
+
+- 請注意$i$並非次方的意思，而是第幾次的迭代符號
+，這是一個迭代的算法，你必須要從某個initail guess出發，
+$\eta$則是所謂的學習率代表要往哪裡走幾步，
+$\frac{\partial f(\theta{^i})}{\partial\theta^i}$則是我們要往哪裡走的方向!
+
+現在我要開始代數字了 ，假設我們的function 很簡單，只有一個參數
+$f(x)=x^2$ 也就是theta in this case is x.
+然後我們的intial guess $x{^1}$ is -3.
+為了方便計算學習率$\eta=0.1$，
+我們來逐步的代入看看會發生甚麼事情
+
+## 算法的數字例子 
+
+第一步:要先找出$\frac{\partial f(\theta{^i})}{\partial\theta^i}$的形式為何
+
+這裡會微分的朋友就知道 答案是 $2x{^{(i)}}$
+
+所以當 i=1時
+
+$$x{^2}=x{^1}-\eta*\frac{\partial f(x{^i})}{\partial x^i} $$
+
+$$x{^1}=-3-0.1*2*(x{^0}) $$
+將-3代入$x{^0}$
+$$x{^2}=-3-0.1*2*(-3) $$
+$$x{^2}=-2.4$$
+
+所以當 i=2時
+
+$$x{^3}=-2.4-0.1*2*(-2.4)$$
+$$x{^3}=-1.92   $$
+
+剩下的應該可以依此類推了,
+最後寫一個寫程式詳細列出這所有的過程
+
+## 程式碼實作 (函數1)
+
+
+```{r}
+x=seq(-3,3,0.01)
+plot(  x,x^2 ,type = "l" ,xlab = "x",ylab = "f(x)"  )
+
+```
+
+- 這裡不使用迭代的收斂條件，而是固定迭代的次數 秀出結果(每次的X和其對應的f(x))
+
+```{r}
+#R is number of iteration 
+R=10
+#eta is learning rate
+eta <- 0.1
+#intail guess of x
+intail_x <- -3
+# objective function
+f <- function(x) {x^2}
+# partial objective function
+partialf <-function(x) {2*x} 
+
+x=numeric(length=(R+1))
+x[1] <-intail_x 
+
+for(i in 1:R){
+
+  x[i+1] <- x[i]-eta*partialf(x[i])
+  
+}
+data.frame(x,y=f(x))
+```
+
+可以看出我們的算法正確，請讀者去看一下x的值和手算的一樣，因為x隨著迭代的次數增加也會跟著靠近真正的答案0
+
+但是還沒完喔，如果我們的learing rate設的不太好，可能會有以下的慘況
+
+### if $\eta=1$ in this case
+```{r}
+R=10
+#eta is learning rate
+eta <- 1
+#intail guess of x
+intail_x <- -3
+# objective function
+f <- function(x) {x^2}
+# partial objective function
+partialf <-function(x) {2*x} 
+
+x=numeric(length=(R+1))
+x[1] <-intail_x 
+
+for(i in 1:R){
+
+  x[i+1] <- x[i]-eta*partialf(x[i])
+  
+}
+data.frame(x,y=f(x))
+
+```
+
+### if $\eta=2$ in this case
+
+this is the case called overshooting
+就是射太遠了!
+```{r}
+R=10
+#eta is learning rate
+eta <- 2
+#intail guess of x
+intail_x <- -3
+# objective function
+f <- function(x) {x^2}
+# partial objective function
+partialf <-function(x) {2*x} 
+
+x=numeric(length=(R+1))
+x[1] <-intail_x 
+
+for(i in 1:R){
+
+  x[i+1] <- x[i]-eta*partialf(x[i])
+  
+}
+data.frame(x,y=f(x))
+
+```
+
+- 可能會有讀者覺得learning rate越小越好但可以看一下這個以下這個例子
+
+## 程式碼實作 (函數2)
+
+we want minimize this function $x^4-8*x^3$
+
+the global minimum is -432 at 6
+
+
+```{r}
+x=seq(-7,12,0.0001)
+plot( x ,x^4-8*x^3 ,type = "l" ,xlab = "x",ylab = "f(x)"  )
+```
+
+ 
+
+###case1: 
+$\eta=0.0001$
+- 要注意一件事情並非learning rate越小越好!
+
+```{r}
+#R is number of iteration 
+R=35
+#eta is learning rate
+eta <- 0.001
+#intail guess of x
+intail_x <- -3
+# objective function
+f <- function(x) {x^4-8*x^3}
+# partial objective function
+partialf <-function(x) {4*x^3-24*x^2} 
+x=numeric(length=(R+1))
+x[1] <-intail_x 
+for(i in 1:R){
+  x[i+1] <- x[i]-eta*partialf(x[i])
+}
+data.frame(x,y=f(x))
+
+```
+
+###case2: 
+$\eta=0.01$
+
+```{r}
+#R is number of iteration 
+R=35
+#eta is learning rate
+eta <- 0.01
+#intail guess of x
+intail_x <- -3
+# objective function
+f <- function(x) {x^4-8*x^3}
+# partial objective function
+partialf <-function(x) {4*x^3-24*x^2} 
+x=numeric(length=(R+1))
+x[1] <-intail_x 
+for(i in 1:R){
+  x[i+1] <- x[i]-eta*partialf(x[i])
+}
+data.frame(x,y=f(x))
+
+```
+
+#總結
+
+- 這裡可以看出learning rate的大小是一個非常重要的議題，其實intail guess也會影響，有興趣的同學可以改改看
+
+- 只有一個dim的實作非常簡單，可惜的是無法體現微分方向的重要性，因為不是往左就是往右
+
+- 要改我的範例也很簡單，只是要手算出partialf的fucntion
