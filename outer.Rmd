@@ -1,0 +1,20 @@
+---
+title: "Untitled"
+author: "Chen Ning Kuan"
+date: "2020年3月26日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+outer(c(2,3),c(4,5,6,7,8))
+
+
+```
+

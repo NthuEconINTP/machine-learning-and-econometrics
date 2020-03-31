@@ -1,0 +1,302 @@
+---
+title: "linear svm"
+author: "Chen Ning Kuan"
+date: "2020年3月30日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Make linear seperable sample
+
+Becareful I only display how to do svm in linear seperable dataset
+and the dataset only have two label (y=1 or y=-1)  
+
+## show how to make it
+
+Our goal is to make a hyperplane that can separate two label(y)
+
+In this simple case we only have two feature x1 and x2 and two label
+
+y=1 or y=-1(maybe y=1 represent boy,y=-1 represent girl)
+
+
+```{r}
+set.seed(2)
+n = 5
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,4,2),pch=".",cex=7,xlab = "x1",ylab = "x2")
+
+#blue is+1
+#red  is-1
+
+```
+
+## show the data we called df
+
+```{r}
+
+df<- cbind(x,y)
+colnames(df) <- c("x1","x2","y(label)")
+df
+```
+
+# Introduce svm algorithm
+
+## step1 
+
+$f(x)=w_0+w_1x_1+w_2x_2$
+
+## step2 
+
+
+## step3 gradient decesnt
+
+![main algorithm](./svm.png)
+
+# svm from scratch in R
+
+## prepare step
+
+```{r}
+set.seed(2)
+X<- cbind(1,x) #make design matrix
+n <- nrow(X)  #number of sample
+p <- ncol(X) #number of feature+1 (bias)
+w_intial <- rnorm(p,-2,1)
+w <- w_intial
+eta <- 0.1
+R <- 7 #number of iteration
+W <- matrix(w_intial ,nrow = R+1,ncol = p,byrow = T) #matrix put intial guess and the procedure to do gradient descent 
+W
+
+
+```
+
+See the W matrix carefully.we have 3 parameter to optimize,so we have 3 column.the first line record the intial guess value of weight.we have 8 row because we want to record every time we do iteration.
+
+```{r}
+X%*%w_intial
+```
+
+you can see that if you use intial guess to do it.
+you will predict all sample as girl.So,now you know you need algorithm to update it
+
+
+## indicator function
+
+```{r}
+indicator<-function(condition) ifelse(condition,1,0)
+a <- 3
+indicator( a<1 )
+(a<4)*1
+
+```
+
+
+## part of gradient descent
+
+### step1
+```{r}
+
+X%*%w
+dim(X)
+
+sum(   ((y*(X%*%w_intial))<1)*1 * y * X[,1] )
+
+sum(   ((y*(X%*%w_intial))<1)*1 * y * X[,2] )
+
+sum(   ((y*(X%*%w_intial))<1)*1 * y * X[,3] )
+
+
+```
+### step2
+```{r}
+
+w_intial[1]+eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,1] )
+
+w_intial[2]+eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,2] )
+
+w_intial[3]+eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,3] )
+
+```
+### step3
+```{r}
+
+w_intial[1]+eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,1] )
+#W[1,] imply the 1th iteration
+#X[,1] imply the 
+w_intial[2]+eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,2] )
+#X[,2] imply the x1 feature
+w_intial[3]+eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,3] )
+```
+### step4
+```{r}
+for(i in 1:R){
+for(j in 1:p){
+W[i+1,j]<- W[i,j]+eta*sum(((y*(X%*%W[i,]))<1)*1 * y * X[,j] )  
+}
+}
+W
+```
+
+### step5 the result 
+```{r}
+print(   "  the intial guess result  ")
+X%*%W[1,]
+print(   "  the result after 7 iteration  ")
+X%*%W[nrow(W),]
+```
+
+- you can see after 7 iteration our svm sucessfully predict perfectly
+
+### step6 the completely function 
+
+
+```{r}
+svm_gradient<- function(x,eta=0.001,R=10000){
+X<- cbind(1,x)#make design matrix
+n <- nrow(X)  #number of sample
+p <- ncol(X) #number of feature+1 (bias)
+w_intial <- rep(0,p)
+W <- matrix(w_intial ,nrow = R+1,ncol = p,byrow = T) #matrix put intial guess and the procedure to do gradient descent
+for(i in 1:R){
+  for(j in 1:p)
+  {
+    W[i+1,j]<- W[i,j]+eta*sum(((y*(X%*%W[i,]))<1)*1 * y * X[,j] )  
+  }
+  }
+return(W)  
+}
+getsvm <- function(x){
+w_answer<- svm_gradient(x)[nrow(svm_gradient(x)),]
+return(w_answer )
+}
+
+```
+
+## simple case 
+
+```{r}
+
+set.seed(2)
+n = 5
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,4,2),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- getsvm(x)
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline((1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline((-1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+
+set.seed(8)
+n = 5
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,4,2),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- getsvm(x)
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline((1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline((-1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+
+
+# Result
+
+## Case1: 
+
+```{r}
+
+n = 100
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=3,xlab = "x1",ylab = "x2")
+w_answer<- getsvm(x)
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline((1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline((-1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+## Case2: 
+
+```{r}
+
+n = 100
+a1 = rnorm(n)
+a2 = 1 + a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 + b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- getsvm(x)
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline(1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline(-1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+## Case3: not linear seperable set
+
+```{r}
+
+n = 100
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 + b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- getsvm(x)
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline((1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline((-1-w_answer[1])/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+```{r}
+a <- c(-2,-4,-12)
+b <- c(1,-2,21)
+a %o% b
+c<- c(-54,15,4)
+
+c%*%a
+c%*%b
+```
+
+
+$$x_2=2x_1+4{ } ......equation1 $$ 
+
+$$\phi(x_1,x_2)=\phi(x_1,x_2,x_1^2+x_2^2)$$
+
+for example 
+$$\phi(0,4)=(0,4,16) $$ 
+
+$$\phi(1,6)=(0,4,16) $$ 
+
+請問我要如何得到equation1 經過投影後$\phi(x1,x2)$的方程式為何，我只會找點投影到店

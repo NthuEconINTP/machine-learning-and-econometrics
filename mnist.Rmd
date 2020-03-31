@@ -1,0 +1,17 @@
+---
+title: "mnist"
+author: "Chen Ning Kuan"
+date: "2020年3月31日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(magrittr)
+getwd()
+train <- read.csv('train.csv')
+```
+

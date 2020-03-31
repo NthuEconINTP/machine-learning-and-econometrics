@@ -15,6 +15,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 require(magrittr)# fancy pipe 11 
 #require(matrixcalc)
+require(data.table)
 ```
 
 # The origin of this note
@@ -23,6 +24,8 @@ require(magrittr)# fancy pipe 11
 
 還有網路上其實沒有很多R語言的手刻範例，即使有也不見得是中文的，也很少到逐步去解釋programmer的思路的筆記
 
+
+[R code in github](https://github.com/empireisme/machine-learning-and-econometrics/blob/master/KNNdisplay.Rmd)
 
 # Introduce the algorithm of Knn
 
@@ -34,9 +37,9 @@ require(magrittr)# fancy pipe 11
 
 - we use the famous dataset iris to check it
 
-```{r}
+```{r    warning=FALSE     }
 data(iris)
-class(iris$Species)
+class(iris$Species) # check
 set.seed(1)
 data <- iris[sample(nrow(iris))   ,] # 打散資料
 Xtrain <- data[1:100,1:4]
@@ -44,6 +47,14 @@ label <- data[1:100,5]
 Xtest <- data[101:150,1:4]
 testlabel <- data[101:150,5]
 ```
+
+```{r   warning=FALSE} 
+
+data.table(iris)
+
+```
+
+- 這裡可以看出我們要在給定花的長度，寬度等資訊下，去預測花的品種
 
 #Implement Knn with out using package
 

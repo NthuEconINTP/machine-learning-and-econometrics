@@ -1,0 +1,262 @@
+---
+title: "svm"
+author: "Chen Ning Kuan"
+date: "2020年3月30日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Make linear seperable sample
+
+## show how to make it
+
+Our goal is to make a hyperplane that can separate two label(y)
+
+In this simple case we only have two feature x1 and x2 and two label
+
+y=1 or y=-1(maybe y=1 represent boy,y=-1 represent girl)
+
+
+```{r}
+
+set.seed(2)
+n = 10
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,4,2),pch=".",cex=7,xlab = "x1",ylab = "x2")
+
+#blue is+1
+#red  is-1
+
+```
+
+## show the data we called df
+
+```{r}
+
+df<- cbind(x,y)
+colnames(df) <- c("x1","x2","y(label)")
+df
+```
+
+# Introduce svm algorithm
+
+## step1 
+
+$f(x)=w_0+w_1x_1+w_2x_2$
+
+## step2 
+
+## step3 gradient decesnt
+
+
+# svm from scratch in R
+
+## prepare step
+
+```{r}
+set.seed(2)
+X<- cbind(1,x) #make design matrix
+n <- nrow(X)  #number of sample
+p <- ncol(X) #number of feature+1 (bias)
+w_intial <- rnorm(p,0,3)
+w <- w_intial
+eta <- 0.001
+R <- 7 #number of iteration
+W <- matrix(w_intial ,nrow = R+1,ncol = p,byrow = T) #matrix put intial guess and the procedure to do gradient descent 
+W
+```
+
+## indicator function
+
+```{r}
+indicator<-function(condition) ifelse(condition,1,0)
+a <- 3
+indicator( a<1 )
+(a<4)*1
+
+
+```
+
+
+## part of gradient descent
+
+```{r}
+require(magrittr)
+X%*%w
+dim(X)
+
+sum(   ((y*(X%*%w))<1)*1 * y * X[,1] )
+
+sum(   ((y*(X%*%w))<1)*1 * y * X[,2] )
+
+sum(   ((y*(X%*%w))<1)*1 * y * X[,3] )
+
+gradient <- function(i){
+  
+a<- sum(   ((y*(X%*%w))<1)*1 * y * i )  
+return(a)
+}
+
+apply( X,2,gradient  )
+
+```
+
+```{r}
+
+w_intial[1]-eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,1] )
+
+w_intial[2]-eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,2] )
+
+w_intial[3]-eta*sum(   ((y*(X%*%w))<1)*1 * y * X[,3] )
+
+#m=c()
+
+#for(j in 1:p){
+  
+  
+#m[j]<- w_intial[j]-eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,j] )  
+  
+#}
+
+#m
+#X%*%W[1,]
+```
+
+```{r}
+
+w_intial[1]-eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,1] )
+#W[,1] imply the 1th iteration
+
+w_intial[2]-eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,2] )
+
+w_intial[3]-eta*sum(   ((y*(X%*%W[1,]))<1)*1 * y * X[,3] )
+```
+
+```{r}
+eta
+W
+
+for(i in 1:R){
+for(j in 1:p){
+W[i+1,j]<- W[i,j]-eta*sum(((y*(X%*%W[i,]))<1)*1 * y * X[,j] )  
+}
+}
+W
+```
+
+
+```{r}
+
+svm_gradient<- function(x,eta=0.001,R=10000){
+  
+X<- cbind(1,x)#make design matrix
+X
+n <- nrow(X)  #number of sample
+p <- ncol(X) #number of feature+1 (bias)
+w_intial <- rnorm(p,0,1)
+W <- matrix(w_intial ,nrow = R+1,ncol = p,byrow = T) #matrix put intial guess and the procedure to do gradient descent
+
+for(i in 1:R){
+  for(j in 1:p)
+  {
+    W[i+1,j]<- W[i,j]+eta*sum(((y*(X%*%W[i,]))<1)*1 * y * X[,j] )  
+  }
+  }
+  
+return(W)  
+}
+
+#svm_gradient(x)
+#dim(svm_gradient(x))
+w_answer<- svm_gradient(x)[nrow(svm_gradient(x)),]
+w_answer
+
+X%*%w_answer
+
+y
+```
+
+```{r}
+f <- function(x1,x2) w_answer[1]+w_answer[2]*x1+w_answer[3]*x2
+x2 <- x1 <- seq(-10,10,length=100)
+z <- outer(x1,x2,f)
+contour(
+  x=x1, y=x2, z=z, 
+  levels=0, las=1, drawlabels=FALSE, lwd=3
+)
+```
+
+
+```{r}
+set.seed(2)
+n = 100
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 - b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- svm_gradient(x)[nrow(svm_gradient(x)),]
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline(1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline(-1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+```{r}
+set.seed(2)
+n = 100
+a1 = rnorm(n)
+a2 = 1 + a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 + b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=7,xlab = "x1",ylab = "x2")
+w_answer<- svm_gradient(x)[nrow(svm_gradient(x)),]
+abline(-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3])
+abline(1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+abline(-1-w_answer[1]/w_answer[3],-w_answer[2]/w_answer[3],lty=2)
+```
+
+```{r}
+
+set.seed(2)
+n = 100
+a1 = rnorm(n)
+a2 = 1 - a1 + 2* runif(n)
+b1 = rnorm(n)
+b2 = -1 + b1 - 2*runif(n)
+x = rbind(matrix(cbind(a1,a2),,2),matrix(cbind(b1,b2),,2))
+y <- matrix(c(rep(1,n),rep(-1,n)))
+plot(x,col=ifelse(y>0,2,4),pch=".",cex=7,xlab = "x1",ylab = "x2")
+
+```
+
+
+```{r}
+
+
+f <- function(x,y) x^2 - 3*y^2 + 2*x*y - 20
+x <- y <- seq(-10,10,length=100)
+z <- outer(x,y,f)
+contour(
+  x=x, y=x, z=z, 
+  levels=0, las=1, drawlabels=FALSE, lwd=3
+)
+```
+

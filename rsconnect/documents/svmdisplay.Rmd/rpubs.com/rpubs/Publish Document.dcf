@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/592015/aaff92b1542d4e2e871c568d6aff7549
+bundleId: https://api.rpubs.com/api/v1/document/592015/aaff92b1542d4e2e871c568d6aff7549
+url: http://rpubs.com/empireisme/592015
+when: 1585587547.42126

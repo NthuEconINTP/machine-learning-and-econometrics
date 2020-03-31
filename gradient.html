@@ -186,20 +186,19 @@ summary {
 <div id="TOC">
 <ul>
 <li><a href="#筆記的目標"><span class="toc-section-number">1</span> 筆記的目標</a></li>
-<li><a href="#作者的內心話"><span class="toc-section-number">2</span> 作者的內心話</a></li>
-<li><a href="#切入正題"><span class="toc-section-number">3</span> 切入正題</a><ul>
-<li><a href="#目標"><span class="toc-section-number">3.1</span> 目標</a></li>
-<li><a href="#算法的數字例子"><span class="toc-section-number">3.2</span> 算法的數字例子</a></li>
-<li><a href="#程式碼實作-函數1"><span class="toc-section-number">3.3</span> 程式碼實作 (函數1)</a><ul>
-<li><a href="#if-eta1-in-this-case"><span class="toc-section-number">3.3.1</span> if <span class="math inline">\(\eta=1\)</span> in this case</a></li>
-<li><a href="#if-eta2-in-this-case"><span class="toc-section-number">3.3.2</span> if <span class="math inline">\(\eta=2\)</span> in this case</a></li>
+<li><a href="#切入正題"><span class="toc-section-number">2</span> 切入正題</a><ul>
+<li><a href="#目標"><span class="toc-section-number">2.1</span> 目標</a></li>
+<li><a href="#算法的數字例子"><span class="toc-section-number">2.2</span> 算法的數字例子</a></li>
+<li><a href="#程式碼實作-函數1"><span class="toc-section-number">2.3</span> 程式碼實作 (函數1)</a><ul>
+<li><a href="#if-eta1-in-this-case"><span class="toc-section-number">2.3.1</span> if <span class="math inline">\(\eta=1\)</span> in this case</a></li>
+<li><a href="#if-eta2-in-this-case"><span class="toc-section-number">2.3.2</span> if <span class="math inline">\(\eta=2\)</span> in this case</a></li>
 </ul></li>
-<li><a href="#程式碼實作-函數2"><span class="toc-section-number">3.4</span> 程式碼實作 (函數2)</a><ul>
-<li><a href="#case1"><span class="toc-section-number">3.4.1</span> case1:</a></li>
-<li><a href="#case2"><span class="toc-section-number">3.4.2</span> case2:</a></li>
+<li><a href="#程式碼實作-函數2"><span class="toc-section-number">2.4</span> 程式碼實作 (函數2)</a><ul>
+<li><a href="#case1"><span class="toc-section-number">2.4.1</span> case1:</a></li>
+<li><a href="#case2"><span class="toc-section-number">2.4.2</span> case2:</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#總結"><span class="toc-section-number">4</span> 總結</a></li>
+<li><a href="#總結"><span class="toc-section-number">3</span> 總結</a></li>
 </ul>
 </div>
 
@@ -215,17 +214,13 @@ summary {
 </div>
 <ul>
 <li><p>首先我們常常會遇到一個問題就是要使某個函數<span class="math inline">\(f(\theta)\)</span>最小化，<span class="math inline">\(\theta\)</span>是我們的參數，我們要找出在<span class="math inline">\(\theta\)</span>的值在何處時，會使<span class="math inline">\(f(\theta)\)</span>最小，舉例來說如果<span class="math inline">\(f(\theta)=\theta^2+3\)</span> 那麼當theta為0時，我們有最小值3，請注意我們的答案是0而不是3，這點非常重要!</p></li>
-<li><p>我先假定讀者都已經看過Gradient descent的算法，所以我有些地方不會說的太仔細，但我會在該仔細的地方很仔細，其實台灣的教育最大的問題就是老師有時候都不代入數字去做實際運算，很多東西只要你實際帶入數字去算給學生看，就不會那麼難了!</p></li>
+<li><p>我先假定讀者都已經看過Gradient descent的算法，所以我有些地方不會說的太仔細，但我會在該仔細的地方很仔細，其實受限於教學時間的關係，老師上課的時候可能無法代入數字例子，所以我會帶給大家看</p></li>
 </ul>
 </div>
-<div id="作者的內心話" class="section level1">
-<h1><span class="header-section-number">2</span> 作者的內心話</h1>
-<p>我個人的淺見是台灣的老師最大的問題是該仔細的地方講很快，不該仔細的地方講很久! 我的意思是不代數字進去看就看的懂的人根本不需要老師教好嗎!自己看課本就會懂了! 閒話不多說切入正題!</p>
-</div>
 <div id="切入正題" class="section level1">
-<h1><span class="header-section-number">3</span> 切入正題</h1>
+<h1><span class="header-section-number">2</span> 切入正題</h1>
 <div id="目標" class="section level2">
-<h2><span class="header-section-number">3.1</span> 目標</h2>
+<h2><span class="header-section-number">2.1</span> 目標</h2>
 <ul>
 <li><p>Our goal is to minimize <span class="math inline">\(f(\theta)\)</span> where <span class="math inline">\(\theta\)</span> is a vector or a scalar</p></li>
 <li><p>theta它是我們的參數可以有一個或是很多個</p></li>
@@ -244,7 +239,7 @@ summary {
 <p>現在我要開始代數字了 ，假設我們的function 很簡單，只有一個參數 <span class="math inline">\(y=f(x)=x^2\)</span> 也就是theta in this case is x. 然後我們的intial guess <span class="math inline">\(x{^1}\)</span> is -3. 為了方便計算學習率<span class="math inline">\(\eta=0.1\)</span>， 我們來逐步的代入看看會發生甚麼事情</p>
 </div>
 <div id="算法的數字例子" class="section level2">
-<h2><span class="header-section-number">3.2</span> 算法的數字例子</h2>
+<h2><span class="header-section-number">2.2</span> 算法的數字例子</h2>
 <p>第一步:要先找出<span class="math inline">\(\frac{\partial f(\theta{^i})}{\partial\theta^i}\)</span>的形式為何</p>
 <p>這裡會微分的朋友就知道 答案是 <span class="math inline">\(2x{^{(i)}}\)</span></p>
 <p>第二步:開始代數字啦</p>
@@ -257,7 +252,7 @@ summary {
 <p>剩下的應該可以依此類推了, 最後寫一個寫程式詳細列出這所有的過程</p>
 </div>
 <div id="程式碼實作-函數1" class="section level2">
-<h2><span class="header-section-number">3.3</span> 程式碼實作 (函數1)</h2>
+<h2><span class="header-section-number">2.3</span> 程式碼實作 (函數1)</h2>
 <p>以下都令<span class="math inline">\(y=f(x)\)</span></p>
 <p>我們的函數是 $ min f(x)=x^2$，這個函數的最小值發生在x=0時，其最小值也是<span class="math inline">\(0\)</span></p>
 <ul>
@@ -304,7 +299,7 @@ data.frame(x,y=f(x))</code></pre>
 <p>可以看出我們的算法正確，請讀者去看一下x的值和手算的一樣，而且x也確實隨著迭代的次數增加也會跟著靠近真正的答案0</p>
 <p>但是還沒完喔，如果我們的learing rate設的不太好，可能會有以下的慘況</p>
 <div id="if-eta1-in-this-case" class="section level3">
-<h3><span class="header-section-number">3.3.1</span> if <span class="math inline">\(\eta=1\)</span> in this case</h3>
+<h3><span class="header-section-number">2.3.1</span> if <span class="math inline">\(\eta=1\)</span> in this case</h3>
 <pre class="r"><code>R=10
 #eta is learning rate
 eta &lt;- 1
@@ -341,7 +336,7 @@ data.frame(x,y=f(x))</code></pre>
 </ul>
 </div>
 <div id="if-eta2-in-this-case" class="section level3">
-<h3><span class="header-section-number">3.3.2</span> if <span class="math inline">\(\eta=2\)</span> in this case</h3>
+<h3><span class="header-section-number">2.3.2</span> if <span class="math inline">\(\eta=2\)</span> in this case</h3>
 <pre class="r"><code>R=10
 #eta is learning rate
 eta &lt;- 2
@@ -387,7 +382,7 @@ data.frame(x,y=f(x))</code></pre>
 </div>
 </div>
 <div id="程式碼實作-函數2" class="section level2">
-<h2><span class="header-section-number">3.4</span> 程式碼實作 (函數2)</h2>
+<h2><span class="header-section-number">2.4</span> 程式碼實作 (函數2)</h2>
 <p>以下都令<span class="math inline">\(y=f(x)\)</span></p>
 <p>我們的目標函數是 <span class="math inline">\(x^4-8*x^3\)</span></p>
 <p>這個函數的最小值發生在<span class="math inline">\(x=6\)</span>時</p>
@@ -399,7 +394,7 @@ data.frame(x,y=f(x))</code></pre>
 plot( x ,x^4-8*x^3 ,type = &quot;l&quot; ,xlab = &quot;x&quot;,ylab = &quot;f(x)&quot;  )</code></pre>
 <p><img src="data:image/png;base64,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" width="672" /></p>
 <div id="case1" class="section level3">
-<h3><span class="header-section-number">3.4.1</span> case1:</h3>
+<h3><span class="header-section-number">2.4.1</span> case1:</h3>
 <p><span class="math inline">\(\eta=0.0001\)</span> - 要注意一件事情並非learning rate越小越好!</p>
 <pre class="r"><code>#R is number of iteration 
 R=35
@@ -459,7 +454,7 @@ data.frame(x,y=f(x))</code></pre>
 </ul>
 </div>
 <div id="case2" class="section level3">
-<h3><span class="header-section-number">3.4.2</span> case2:</h3>
+<h3><span class="header-section-number">2.4.2</span> case2:</h3>
 <p><span class="math inline">\(\eta=0.01\)</span></p>
 <pre class="r"><code>#R is number of iteration 
 R=35
@@ -521,7 +516,7 @@ data.frame(x,y=f(x))</code></pre>
 </div>
 </div>
 <div id="總結" class="section level1">
-<h1><span class="header-section-number">4</span> 總結</h1>
+<h1><span class="header-section-number">3</span> 總結</h1>
 <ul>
 <li><p>這裡可以看出learning rate的大小是一個非常重要的議題，其實intial guess也會影響，有興趣的同學可以改改看</p></li>
 <li><p>當<span class="math inline">\(\theta\)</span>只有一個dim的實作非常簡單，可惜的是無法體現微分方向的重要性，因為不是往左就是往右</p></li>
