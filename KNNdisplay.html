@@ -440,7 +440,7 @@ predicted==packageanswer</code></pre>
 <p>比較一下自己寫的function跟套件的速度</p>
 <pre class="r"><code>system.time(my_knn( Xtrain,Xtest,label,k=4))</code></pre>
 <pre><code>##    user  system elapsed 
-##    4.67    0.00    4.67</code></pre>
+##    4.64    0.00    4.66</code></pre>
 <pre class="r"><code>system.time( knn(Xtrain,Xtest,label,k=4    )     )</code></pre>
 <pre><code>##    user  system elapsed 
 ##       0       0       0</code></pre>

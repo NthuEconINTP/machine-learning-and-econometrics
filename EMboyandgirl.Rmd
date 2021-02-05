@@ -1,0 +1,129 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(magrittr)
+```
+
+EM演算法的用途
+
+
+## Generate sample
+
+```{r}
+set.seed(1)
+mu1 <- 180  #男生平均身高
+mu2 <- 170  #女生平均身高
+sd <- 6
+height<- rnorm(600,mu1,sd=sd)
+boy <- as.data.frame(height)
+height<<- rnorm(400,mu2,sd=sd)
+girl <- as.data.frame(height)
+sex=rep(c("M","F"),c(600,400))
+sex <- as.factor(sex)
+df=data.frame(sex,height=c(boy$height,girl$height))
+index <- sample(1:1000,1000,replace = F)#打散資料
+df <- df[index,]
+head(df)
+```
+
+## 理想狀況 
+
+如果你知道誰是男生，誰是女生，那你當然可以用各自的xbar男生的母體平均身高跟女生的母體平均身高
+
+```{r}
+library(plyr)
+mu <- ddply(df, "sex", summarise, grp.mean=mean(height))
+
+ggplot(df, aes(x=height, color=sex)) +
+  geom_density()
+# Add mean lines
+p<-ggplot(df, aes(x=height, color=sex)) +
+  geom_density()+
+  geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
+             linetype="dashed")
+p
+```
+
+## 實際的狀況
+
+但是你不行，你的資料被混在一起，所以你只會看出以下這張圖
+你唯一的資訊就是男生女生的身高都是常態分配
+以及男生女生的身高標準差相等且等於6
+
+而且資料完全被混在一起無法透過單純的觀察有兩個峰來猜測男生女生的平均身高
+
+
+```{r}
+
+ggplot(df, aes(x=height)) +
+  geom_density()
+
+```
+
+```{r}
+print("綜合身高")
+mu<- df$height %>% mean
+#suppose boy=180 girl=150 as our initial value
+mu
+sd<- df$height %>% sd
+print("男生的初始身高猜測值")
+boy_intial<- mu+3*sd
+boy_intial
+print("女生的初始身高猜測值")
+girl_intial<- mu-3*sd
+girl_intial
+
+```
+
+這裡採用取巧方式去做，我們的Estep不去計算複雜的條件期望值，而是單純使用簡單的貝氏定理加上assign的方式去做
+
+
+
+```{r}
+
+#abs(df$height-boy_intial)
+#abs(df$height-girl_intial)
+
+sex1<- ifelse(abs(df$height-boy_intial)< abs(df$height-girl_intial),"M","F")
+boy_mu1 <- mean(df$height[which(sex1=="M")])
+girl_mu1 <- mean(df$height[which(sex1=="F")])
+print("第一輪的男生女生類EM算法預測平均身高")
+boy_mu1 
+girl_mu1
+```
+
+設計成迴圈ㄓ
+```{r}
+
+M <- 30
+Sex <- matrix(0,nrow = M,ncol=length(df$height))
+Boy_mu <- numeric(M)
+Girl_mu <- numeric(M)
+Boy_mu[1] <-boy_intial
+Girl_mu[1] <-girl_intial 
+for(i in 2:M){
+
+Sex[i,]<- ifelse(abs(df$height-Boy_mu[i-1])< abs(df$height-Girl_mu[i-1]),"M","F")
+Boy_mu[i] <- mean(df$height[which(Sex[i,]=="M")])
+Girl_mu[i] <- mean(df$height[which(Sex[i,]=="F")])  
+  
+  
+}
+
+```
+
+```{r}
+print("類EM演算法男生身高收斂結果")
+Boy_mu
+
+print("類EM演算法女生身高收斂結果")
+Girl_mu
+plot(x=seq(1:M),y=Boy_mu[1:M],type = "l",ylim = c(175,200))
+plot(x=seq(1:M),y=Girl_mu[1:M],type = "l",ylim = c(150,170))
+```
+
