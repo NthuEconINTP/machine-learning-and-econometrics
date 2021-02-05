@@ -129,8 +129,20 @@ for(i in 1:R){
   x[i+1] <- x[i]-eta*partialf(x[i])
   
 }
-data.frame(x,y=f(x))
+df <- data.frame(x,y=f(x))
+df
 ```
+
+
+```{r}
+x=seq(-3,3,0.01)
+plot(  x,x^2 ,type = "l" ,xlab = "x",ylab = "f(x)"  )
+y <- df$y
+points(  df$x   ,y   ,col = "red",pch =20 ,cex=1.5 )
+s <- seq(length(df$x)-1)
+arrows(df$x[s], y[s], df$x[s+1], df$y[s+1], col = 1:2)
+```
+
 
 可以看出我們的算法正確，請讀者去看一下x的值和手算的一樣，而且x也確實隨著迭代的次數增加也會跟著靠近真正的答案0
 
@@ -162,15 +174,15 @@ data.frame(x,y=f(x))
 
 - 就是互相射來射去又在同一個位置上
 
-### if $\eta=2$ in this case
+### if $\eta=1.1$ in this case
 
 
 ```{r}
 R=10
 #eta is learning rate
-eta <- 2
+eta <- 1.15
 #intail guess of x
-intail_x <- -3
+intail_x <- -10
 # objective function
 f <- function(x) {x^2}
 # partial objective function
@@ -184,11 +196,23 @@ for(i in 1:R){
   x[i+1] <- x[i]-eta*partialf(x[i])
   
 }
-data.frame(x,y=f(x))
-
+df<- data.frame(x,y=f(x))
+df
 ```
 
 - this is the case called overshooting.就是射太遠了!
+
+```{r}
+x=seq(-50,50,0.01)
+plot(  x,x^2 ,type = "l" ,xlab = "x",ylab = "f(x)"  )
+y <- df$y
+points(  df$x   ,y   ,col = "red",pch =20 ,cex=1.5 )
+s <- seq(length(df$x)-1)
+arrows(df$x[s], y[s], df$x[s+1], df$y[s+1], col = 1:2)
+
+
+```
+
 
 ![overshooting and small learning rate](./overshooting.png)
 

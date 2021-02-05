@@ -1,0 +1,54 @@
+---
+title: "machinelearningnote"
+author: "Chen Ning Kuan"
+date: "2020年4月2日"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    # toc_depth: 2
+    number_sections: true
+  # word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Machinelearning
+
+## Gradient descent 
+
+- 實作梯度下降不使用高級套件
+
+https://rpubs.com/empireisme/gradientnote
+
+## Linear SVM
+
+- 實作linear svm不使用高級套件
+
+https://rpubs.com/empireisme/linearsvm
+
+## KNN 
+
+- 實作KNN算法不使用高級套件
+
+https://rpubs.com/empireisme/knn
+
+# Data visulazition
+
+## 北市房價視覺化
+
+https://hackmd.io/GtSjKPeGSE2WIAOYuFj9wQ
+
+
+# essay
+
+## Survival
+
+https://rpubs.com/empireisme/INEapproach
+
+## Android app analysis
+
+using NLP skill
+
+https://rpubs.com/empireisme/appmarket
